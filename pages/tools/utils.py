@@ -15,7 +15,7 @@ def get_mongo_client():
 def get_response_collection():
     client = get_mongo_client()
     db = client['gen_ai_persuasion']
-    return db['participant_responses']
+    return db['responses']
 
 def request_arguments(prompt: str, stance: str):
     if st.session_state.personalized:
@@ -34,13 +34,14 @@ def generic_arguments(prompt: str, stance: str):
     openai_client = get_openai_client()
     response = openai_client.responses.create(
         model="gpt-4o-mini",
-        reasoning={"effort": "low"},
         instructions=f"Generate four 5-sentence arguments that {st.session_state.llm_stance}s with the given statement."
         "The first argument should only use logos, the second only ethos, the third only pathos, and the fourth"
         "should use logos, ethos, and pathos. Separate each argument with a new line. Logos is the appeal to"
         "reason (so you may use statistics, deductive reasoning, inductive reasoning, etc.) Ethos is the appeal"
         "to authority (so you may reference specific historical or contemporary figures, reviews, etc.) Pathos"
-        "is an appeal to emotion (so you may use figurative language, tone, etc.)",
+        "is an appeal to emotion (so you may use figurative language, tone, etc.)"
+        "Only generate the arguments, no extraneous information. This means do NOT generate numbers or point out which "
+        "appeal is being used.",
         input=prompt
     )
     print(response.output_text)
@@ -89,7 +90,7 @@ def personalized_arguments(prompt: str, stance: str):
                     f"and {st.session_state['stated_values'][2]}."
                     "The first argument should only use logos, the second ethos, the third pathos, "
                     "and the fourth should use logos, ethos, and pathos. Separate each argument with a new line, "
-                    "and only generate the arguments, no extraneous information. This means do not generate numbers or point out which "
+                    "and only generate the arguments, no extraneous information. This means do NOT generate numbers or point out which "
                     "appeal is being used."
                     "Logos is the appeal to reason (so you may use statistics, deductive reasoning, inductive reasoning,"
                     "etc.) Ethos is the appeal to authority (so you may reference specific historical or contemporary figures,"
@@ -132,6 +133,7 @@ def clear_session_state():
     st.session_state.pop("shuffled_arguments")
     st.session_state.pop("argument_rankings")
     st.session_state.pop("stance")
+    st.session_state.pop("convincing_score")
 
 custom_style = """
 .sortable-item {

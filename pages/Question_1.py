@@ -37,6 +37,12 @@ else:
                                                   st.session_state.shuffled_arguments[3]['text']],
                                                   direction="vertical",
                                                   custom_style=custom_style)
+    st.session_state.convincing_score = st.number_input("Given your initial stance, please indicate on the scale the degree to which the arguments have changed your position, if at all."
+                                                        "1 means that your stance has not changed at all as a result of the arguments, 5 means your stance has definitely changed as"
+                                                        "a result of the arguments, and 3 means you are ambivalent as to whether they have changed your mind.",
+                                                        max_value=5,
+                                                        min_value=1,
+                                                        step=1)
 
     if st.session_state.stance and st.session_state.argument_rankings:
         if st.button("Question 2", type="primary"):
@@ -53,6 +59,7 @@ else:
                     "statement": st.session_state.prompt,
                     "respondent_stance": st.session_state.stance,
                     "llm_stance": st.session_state.llm_stance,
+                    "convincing_score": st.session_state.convincing_score,
                     "argument_rankings": rhetoric_rankings
                 }
 

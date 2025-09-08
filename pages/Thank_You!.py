@@ -1,4 +1,4 @@
 import streamlit as st
 
-st.markdown("### You're finished!")
+st.title("You're finished!")
 st.markdown("Thank you for your time.")

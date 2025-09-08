@@ -23,37 +23,37 @@ def request_arguments(prompt: str, stance: str):
     else:
         return generic_arguments(prompt, stance)
         
-
 def generic_arguments(prompt: str, stance: str):
     if stance == "Overall agree":
-        llm_stance = "agree"
+        st.session_state.llm_stance = "disagree"
     elif stance == "Neutral":
-        llm_stance = random.choice(["agree", "disagree"])
+        st.session_state.llm_stance = random.choice(["agree", "disagree"])
     else:
-        llm_stance = "disagree"
-    messages = [{
-        "role": "system",
-        "content": (
-            f"Generate four 1-sentence arguments that {llm_stance} with the following: {prompt}. "
-            "The first argument should only use logos, the second ethos, the third pathos, "
-            "and the fourth should use logos, ethos, and pathos. Separate each argument with a new line."
-        )
-    }]
+        st.session_state.llm_stance = "agree"
+    
     openai_client = get_openai_client()
-    response = openai_client.chat.completions.create(
+    response = openai_client.responses.create(
         model="gpt-4o-mini",
-        messages=messages
+        reasoning={"effort": "low"},
+        instructions=f"Generate four 5-sentence arguments that {st.session_state.llm_stance}s with the given statement."
+        "The first argument should only use logos, the second only ethos, the third only pathos, and the fourth"
+        "should use logos, ethos, and pathos. Separate each argument with a new line. Logos is the appeal to"
+        "reason (so you may use statistics, deductive reasoning, inductive reasoning, etc.) Ethos is the appeal"
+        "to authority (so you may reference specific historical or contemporary figures, reviews, etc.) Pathos"
+        "is an appeal to emotion (so you may use figurative language, tone, etc.)",
+        input=prompt
     )
-    return response.choices[0].message.content.split("\n\n")
+    print(response.output_text)
+    return response.output_text.split("\n\n")
 
 def personalized_arguments(prompt: str, stance: str):
     print(st.session_state.values)
     if stance == "Overall agree":
-        llm_stance = "agree"
+        st.session_state.llm_stance = "disagree"
     elif stance == "Neutral":
-        llm_stance = random.choice(["agree", "disagree"])
+        st.session_state.llm_stance = random.choice(["agree", "disagree"])
     else:
-        llm_stance = "disagree"
+        st.session_state.llm_stance = "agree"
     
     if st.session_state.gender == "other":
         gender_description = "person who is neither male nor female"
@@ -73,28 +73,31 @@ def personalized_arguments(prompt: str, stance: str):
     else:
         religion_description = st.session_state.religion
     
-
-    message = [{
-        "role": "system",
-        "content": (
-            f"Generate four 1-sentence arguments that {llm_stance} with the following: {prompt}. "
-            f"Tailor each argument for a {st.session_state.age}-year-old {gender_description} who follows"
-            f"{religion_description}, is {st.session_state.authority} (as per the Political Compass test), "
-            f"falls {st.session_state.economic} (as per the Political Compass test) and closely aligns"
-            f"with the following three values: {st.session_state['stated_values'][0]}, {st.session_state['stated_values'][1]},"
-            f"and {st.session_state['stated_values'][2]}."
-            "The first argument should only use logos, the second ethos, the third pathos, "
-            "and the fourth should use logos, ethos, and pathos. Separate each argument with a new line, "
-            "and only generate the arguments. This means do not generate numbers or point out which "
-            "appeal is being used."
-        )
-    }]
     openai_client = get_openai_client()
-    response = openai_client.chat.completions.create(
+    response = openai_client.responses.create(
         model="gpt-4o-mini",
-        messages=message
+        instructions=f"Generate four 5-sentence arguments that {st.session_state.llm_stance}s with the given statement."
+                    "The first argument should only use logos, the second only ethos, the third only pathos, and the fourth"
+                    "should use logos, ethos, and pathos. Separate each argument with a new line. Logos is the appeal to"
+                    "reason (so you may use statistics, deductive reasoning, inductive reasoning, etc.) Ethos is the appeal"
+                    "to authority (so you may reference specific historical or contemporary figures, reviews, etc.) Pathos"
+                    "is an appeal to emotion (so you may use figurative language, tone, etc.)"
+                    f"Tailor each argument for a {st.session_state.age}-year-old {gender_description} who follows"
+                    f"{religion_description}, is {st.session_state.authority} (as per the Political Compass test), "
+                    f"falls {st.session_state.economic} (as per the Political Compass test) and closely aligns"
+                    f"with the following three values: {st.session_state['stated_values'][0]}, {st.session_state['stated_values'][1]},"
+                    f"and {st.session_state['stated_values'][2]}."
+                    "The first argument should only use logos, the second ethos, the third pathos, "
+                    "and the fourth should use logos, ethos, and pathos. Separate each argument with a new line, "
+                    "and only generate the arguments, no extraneous information. This means do not generate numbers or point out which "
+                    "appeal is being used."
+                    "Logos is the appeal to reason (so you may use statistics, deductive reasoning, inductive reasoning,"
+                    "etc.) Ethos is the appeal to authority (so you may reference specific historical or contemporary figures,"
+                    "reviews, etc.) Pathos is an appeal to emotion (so you may use figurative language, tone, etc.)",
+        input=prompt
     )
-    return response.choices[0].message.content.split("\n\n")
+    print(response.output_text)
+    return response.output_text.split("\n\n")
 
 
 def randomize(args: list, num: int):
@@ -111,7 +114,7 @@ def get_random_prompt():
             "Money is the root of all evil",
             "Space exploration is worth the investment",
             "Nowadays, fashion is elitist",
-            "The richest 1% \are necessary",
+            "The richest 1% are necessary",
             "Art can be separated from the artist",
             "Digital literature is a step in the right direction",
             "Public safety comes before personal freedoms",
@@ -122,3 +125,55 @@ def get_random_prompt():
     selected_prompt = random.choice(st.session_state.available_prompts)
     st.session_state.available_prompts.remove(selected_prompt)
     return selected_prompt
+
+def clear_session_state():
+    st.session_state.pop("prompt")
+    st.session_state.pop("arguments")
+    st.session_state.pop("shuffled_arguments")
+    st.session_state.pop("argument_rankings")
+    st.session_state.pop("stance")
+
+custom_style = """
+.sortable-item {
+    background-color: #FFFFFF;
+    border: 1px solid #E0E0E0;
+    border-radius: 8px;
+    padding: 10px;
+    margin-bottom: 6px;
+    color: #31333F;
+    font-size: 16px;
+    line-height: 1.4em;
+    min-height: 40px;
+    display: flex;
+    align-items: center;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.sortable-item:hover {
+    background-color: #F8F9FB
+    border-color: #FF4B4B;
+    color: #31333F;
+    padding: 10px;
+    min-height: 40px;
+    cursor: grab;
+}
+
+/* Dragging state */
+.sortable-chosen {
+    background-color: #FF4B4B !important;
+    color: white !important;
+    border-color: #E63946 !important;
+    min-height: 40px;
+    padding: 10px;
+    cursor: grabbing;
+}
+
+/* Placeholder while dragging */
+.sortable-ghost {
+    background-color: #FFD6D6 !important;
+    border: 1px dashed #FF4B4B;
+    opacity: 0.8;
+    min-height: 40px;
+    padding: 10px;
+}
+"""

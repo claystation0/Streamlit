@@ -3,10 +3,9 @@ from datetime import datetime, timezone
 import random
 from pages.tools.utils import *
 
+st.title("Contextual Data")
 if 'personalized' not in st.session_state:
     st.session_state.personalized = random.choice([True, False])
-
-st.header("Persuasion Survey: Contextual Data")
 st.session_state.gender = st.radio("What is your gender?", 
         ["Male", "Female", "Other"],
         index=None)
@@ -30,7 +29,7 @@ st.session_state.economic = st.radio("On the political spectrum, do you fall lef
 st.session_state.authority = st.radio("Are you authoritarian, centrist, or libertarian?", 
         ["Authoritarian", "Centrist", "Libertarian"],
         index=None)
-st.session_state.open_minded = st.number_input("On a scale from 1 to 5, how open-minded are you?",
+st.session_state.open_minded = st.number_input("On a scale from 1 to 5, how open-minded are you? 5 is extremely open-minded, while 1 is not at all.",
                 min_value=1,
                 max_value=5,
                 step=1)

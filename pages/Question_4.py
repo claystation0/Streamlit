@@ -11,7 +11,7 @@ st.html("""
     </style>
     """)
 
-st.write("### Question 5 of 15")
+st.write("### Question 4 of 15")
 
 if "prompt" not in st.session_state:
     st.session_state.prompt = get_random_prompt()
@@ -53,7 +53,7 @@ else:
                                                         step=1)
 
     if st.session_state.stance and st.session_state.argument_rankings:
-        if st.button("Move on to Question 6", type="primary"):
+        if st.button("Move on to Question 5", type="primary"):
             convincing_score = st.session_state.stance    
 
             text_to_category = {arg["text"]: arg["category"] for arg in st.session_state.shuffled_arguments}
@@ -82,6 +82,6 @@ else:
                 )
 
                 clear_session_state()
-                st.switch_page("pages/Question_6.py")
+                st.switch_page("pages/Question_5.py")
             else:
                 st.warning("No participant ID found. Cannot submit response.")

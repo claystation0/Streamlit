@@ -3,6 +3,14 @@ from datetime import datetime, timezone
 import random
 from pages.tools.utils import *
 
+st.html("""
+    <style>
+    div[data-testid^="st"] > label > div[data-testid="stMarkdownContainer"] > p {
+        font-size: 17px !important;
+    }
+    </style>
+    """)
+
 st.title("Contextual Data")
 if 'personalized' not in st.session_state:
     st.session_state.personalized = random.choice([True, False])
@@ -20,9 +28,7 @@ st.session_state.stated_values = st.multiselect(
     "Please select your top three values that you most closely align with.", 
     ["Integrity", "Respect", "Justice", "Truth", "Empathy", "Cooperation", "Accountability", "Strength", "Tolerance", "Leadership"],
     max_selections=3)
-st.markdown(
-    "**Please answer the** [Political Compass Test](https://www.politicalcompass.org/test) **to complete the next two questions.**"
-)
+st.markdown("##### Please complete the [Political Compass Test](https://www.politicalcompass.org/test) to answer the next two questions.")
 st.session_state.economic = st.radio("On the political spectrum, do you fall left, right, or center?", 
         ["Right", "Center", "Left"],
         index=None)
@@ -35,9 +41,7 @@ st.session_state.open_minded = st.number_input("On a scale from 1 to 5, how open
                 step=1)
 
 if st.button("Next", type="primary"):
-    print(st.session_state.personalized)
     required_fields = [
-        st.session_state.open_minded,
         st.session_state.authority,
         st.session_state.economic,
         st.session_state.stated_values,
